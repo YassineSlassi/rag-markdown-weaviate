@@ -1,0 +1,39 @@
+# --- Environnement virtuel -------------------------------------------------
+# Plusieurs Go a cause de torch. Ne JAMAIS versionner : requirements.txt suffit
+# a le reconstruire, et GitHub refuse les fichiers de plus de 100 Mo.
+.venv/
+venv/
+env/
+
+# --- Artefacts Python ------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- Secrets ---------------------------------------------------------------
+# Le code lit ANTHROPIC_API_KEY depuis l'environnement, donc aucune cle ne
+# devrait exister en fichier. Ces regles sont un filet de securite.
+.env
+.env.*
+*.key
+secrets.*
+
+# --- Caches de modeles -----------------------------------------------------
+# BGE-M3 (~2,2 Go) vit dans ~/.cache/huggingface, hors du depot. Ces regles
+# couvrent le cas ou HF_HOME serait redirige dans le projet.
+.cache/
+huggingface/
+models/
+
+# --- Donnees locales -------------------------------------------------------
+# Le volume Weaviate est gere par Docker, pas par le depot. Si tu montes un
+# dossier local a la place, ajoute-le ici.
+weaviate_data/
+
+# --- Outils et OS ----------------------------------------------------------
+.claude/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

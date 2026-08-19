@@ -1,0 +1,49 @@
+# Weaviate en local, sans aucun module de vectorisation :
+# c'est NOUS qui fournissons les vecteurs (BGE-M3), pas Weaviate.
+#
+# Lancer  :  docker compose up -d
+# Statut  :  docker compose ps
+# Logs    :  docker compose logs -f weaviate
+# Arrêter :  docker compose down          (les données survivent, cf. volume)
+# Reset   :  docker compose down -v       (⚠️ supprime le volume = perte de l'index)
+
+services:
+  weaviate:
+    # TODO : `latest` marche pour apprendre, mais en vrai on épingle une version.
+    #        Le conteneur actuellement lancé résout `latest` vers la 1.39.0
+    #        (vérifié via client.get_meta()). Remplace donc par :1.39.0 pour
+    #        figer ton environnement.
+    #        Pourquoi c'est important ? Réfléchis à ce qui se passe le jour où
+    #        `latest` avance d'une version majeure alors que ton volume de
+    #        données, lui, a été écrit par l'ancienne.
+    image: cr.weaviate.io/semitechnologies/weaviate:latest
+
+    ports:
+      - "8080:8080"    # API REST
+      - "50051:50051"  # gRPC  <-- INDISPENSABLE pour le client Python v4.
+                       #           Si tu oublies ce port, la connexion "réussit"
+                       #           puis explose au premier insert/query.
+
+    restart: on-failure:0
+
+    volumes:
+      - weaviate_data:/var/lib/weaviate   # persistance : sans ça, tu réindexes
+                                          # 2,2 Go d'embeddings à chaque restart
+
+    environment:
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+
+      # Pas d'auth : OK en local sur ta machine, JAMAIS exposé sur un réseau.
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+
+      # Aucun module de vectorisation chargé, et aucun vectorizer par défaut.
+      # C'est la contrepartie côté serveur du "self-provided / vectorizer=none"
+      # que tu devras déclarer dans ensure_collection() (étage 4).
+      ENABLE_MODULES: ''
+      DEFAULT_VECTORIZER_MODULE: 'none'
+
+      QUERY_DEFAULTS_LIMIT: 25
+      CLUSTER_HOSTNAME: 'node1'
+
+volumes:
+  weaviate_data:

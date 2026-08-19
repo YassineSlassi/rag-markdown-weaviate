@@ -1,0 +1,66 @@
+# ENVIRONNEMENT VÉRIFIÉ sur cette machine (11/08/2026)
+#   Windows 11 Home 26100 | Python 3.11.9
+#   AMD Ryzen 5 5600X (6 coeurs / 12 threads) | 16 Go RAM
+#   GPU AMD Radeon RX 5700 XT -> inutilisable pour PyTorch, cf. note torch
+#   Docker 29.6.2 -> OK, conteneur Weaviate déjà lancé
+#
+# Tout est déjà installé dans .venv. Pour réinstaller ailleurs :
+#   .\.venv\Scripts\Activate.ps1
+#   pip install -r requirements.txt
+
+# --- Coeur LangChain (v1.x) ------------------------------------------------
+langchain-core>=1.5             # le type Document, l'interface Embeddings
+langchain-community>=0.4        # document loaders (TextLoader, DirectoryLoader...)
+langchain-text-splitters>=1.1   # MarkdownHeaderTextSplitter, RecursiveCharacter...
+#
+# ⚠️ Tu es sur LangChain 1.x, qui a redistribué les paquets. Beaucoup de code
+#    qui vivait dans `langchain` est parti dans `langchain-classic`. Si un tuto
+#    fait `from langchain.text_splitter import ...` et que ça casse, c'est cette
+#    migration — pas ton code. Les bons imports pour ce projet sont ceux listés
+#    en haut de rag_pipeline.py, ils ont été vérifiés sur ces versions.
+
+# --- Embeddings BGE-M3 -----------------------------------------------------
+langchain-huggingface>=1.2      # wrapper HuggingFaceEmbeddings
+sentence-transformers>=5.6      # moteur d'encodage utilisé par le wrapper
+torch>=2.13                     # backend de calcul
+#
+# NOTE GPU — elle a des conséquences directes sur l'étage 3 :
+#   Ta carte est une AMD RX 5700 XT. PyTorch n'a pas de build GPU utilisable
+#   pour elle sous Windows : ROCm ne cible que Linux, et RDNA1 (gfx1010) n'est
+#   pas dans sa liste de GPU supportés. torch est donc en build CPU pur
+#   (2.13.0+cpu) et torch.cuda.is_available() renvoie False.
+#   -> device="cpu" à l'étage 3, sans alternative.
+#   -> l'embedding sera le goulot d'étranglement du pipeline. À l'échelle de ce
+#      corpus (3 fichiers) c'est indolore ; retiens juste que sur 100 000 chunks
+#      ce serait le poste de coût numéro un.
+
+# Alternative "officielle" BGE-M3, qui donne accès aux vecteurs sparse et
+# ColBERT en plus du dense. Décommente SEULEMENT si tu veux explorer la
+# recherche hybride plus tard :
+# FlagEmbedding
+
+# --- Base vectorielle ------------------------------------------------------
+weaviate-client>=4.22           # API v4. Version vérifiée ici : 4.22.0
+#
+# ⚠️ Deux pièges de version, pas un :
+#   1. Les tutos en client v3 (`client.schema.create`, `client.data_object`)
+#      ne fonctionneront pas du tout. Vérifie toujours la version d'un exemple.
+#   2. Même en v4, DEUX façons de dire "je fournis mes propres vecteurs"
+#      coexistent en 4.22 : Configure.Vectorizer.none() (ancienne) et
+#      Configure.Vectors.self_provided() (actuelle). Elles ne se passent PAS au
+#      même paramètre de collections.create(). Cf. TODO 2 de ensure_collection().
+
+# --- Generation (etage 7 : la reponse) -------------------------------------
+anthropic>=0.122                # SDK officiel. Version verifiee ici : 0.122.0
+#
+# Necessaire UNIQUEMENT pour la commande `ask`. `index` et `query` s'en passent
+# (l'import est fait a l'interieur de cmd_ask, pas en tete de rag_pipeline.py),
+# donc tout le retrieval reste utilisable sans cle API ni SDK.
+#
+# Auth : ANTHROPIC_API_KEY dans l'environnement. Jamais en dur dans le code.
+#   cmd.exe :  setx ANTHROPIC_API_KEY "sk-ant-..."   puis NOUVEAU terminal
+# Le SDK lit aussi ANTHROPIC_BASE_URL s'il est present : verifie qu'il ne
+# traine pas dans ton environnement, il redirigerait les appels ailleurs.
+
+# --- Confort ---------------------------------------------------------------
+tqdm>=4.70                      # barres de progression pour l'embedding en batch
