@@ -13,7 +13,7 @@ question ────▶ [5 EMBED QUERY] ─────▶ [6 SEARCH] ─▶ To
 
 - Python 3.11
 - Docker (pour Weaviate)
-- Une clé API Anthropic — **uniquement** pour la commande `ask`
+- Une clé API Anthropic (**uniquement** pour la commande `ask`)
 
 ## Installation
 
