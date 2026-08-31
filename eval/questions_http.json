@@ -1,0 +1,349 @@
+{
+  "corpus": "translated-content/files/fr/web/http/reference",
+  "collection": "HttpStress",
+  "note": "Banc d'essai DIFFICILE. Contrairement au glossaire, ou chaque fiche traite un concept distinct, ici les 259 fiches partagent le meme domaine, le meme vocabulaire et la meme forme redactionnelle : sept en-tetes commencent par 'Accept', cinq en-tetes CORS sont quasi identiques, toutes les fiches de statut disent 'le code de statut de reponse HTTP indique que...'. Le retriever ne peut plus s'en sortir en identifiant le SUJET : il doit distinguer des voisins immediats. Toutes les questions ci-dessous ont ete redigees a partir des definitions reellement presentes dans les fichiers, jamais de memoire.",
+  "questions": [
+    {
+      "id": "s01",
+      "type": "statut",
+      "question": "Quel code de reponse indique qu'une requete a echoue faute d'identifiants d'authentification valides ?",
+      "pertinents": [
+        {
+          "source": "status/401/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "type": "statut",
+      "question": "Quel code indique que le serveur a bien compris la requete mais refuse de l'autoriser ?",
+      "pertinents": [
+        {
+          "source": "status/403/index.md",
+          "extrait": "L'échec de la requête est lié à la logique applicative, comme des permissions insuffisantes pour une ressource ou une action."
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "type": "statut",
+      "question": "Quel code indique que le serveur ne trouve pas la ressource demandee ?",
+      "pertinents": [
+        {
+          "source": "status/404/index.md",
+          "extrait": "Un code de statut 404 indique uniquement que la ressource est absente, sans préciser si c'est temporaire ou permanent."
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "type": "statut",
+      "question": "Quel code indique qu'une ressource n'est definitivement plus disponible sur le serveur ?",
+      "pertinents": [
+        {
+          "source": "status/410/index.md",
+          "extrait": "Une réponse 410 est mise en cache par défaut."
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "type": "statut",
+      "question": "Quel code de redirection transmet le classement des moteurs de recherche a la nouvelle adresse ?",
+      "pertinents": [
+        {
+          "source": "status/301/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "type": "statut",
+      "commentaire": "Distinction avec 307 : apres un 302 l'agent utilisateur PEUT changer la methode, apres un 307 c'est interdit.",
+      "question": "Apres quel code de redirection temporaire l'agent utilisateur est-il autorise a changer la methode de la requete ?",
+      "pertinents": [
+        {
+          "source": "status/302/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "type": "statut",
+      "question": "Quel code de redirection temporaire interdit de modifier la methode de la requete redirigee ?",
+      "pertinents": [
+        {
+          "source": "status/307/index.md",
+          "extrait": "La méthode et le corps de la requête d'origine sont réutilisés pour effectuer la requête redirigée."
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "type": "statut",
+      "question": "Quel code de redirection permanente garantit que la methode et le corps de la requete ne sont pas modifies ?",
+      "pertinents": [
+        {
+          "source": "status/308/index.md",
+          "extrait": "La méthode de requête et son corps **ne sont pas modifiés** par le client lors de la requête redirigée."
+        }
+      ]
+    },
+    {
+      "id": "h01",
+      "type": "cache",
+      "question": "Quel en-tete contient les directives qui controlent la mise en cache, aussi bien en requete qu'en reponse ?",
+      "pertinents": [
+        {
+          "source": "headers/cache-control/index.md",
+          "extrait": "Toutefois, l'utilisation de minuscules est recommandée, car certaines implémentations ne reconnaissent pas les directives en"
+        }
+      ]
+    },
+    {
+      "id": "h02",
+      "type": "cache",
+      "question": "Quel en-tete donne la date et l'heure apres laquelle une reponse est consideree comme perimee ?",
+      "pertinents": [
+        {
+          "source": "headers/expires/index.md",
+          "extrait": "- GMT - : Temps sur le Méridien de Greenwich."
+        }
+      ]
+    },
+    {
+      "id": "h03",
+      "type": "cache",
+      "question": "Quel en-tete indique depuis combien de secondes un objet se trouve dans un cache proxy ?",
+      "pertinents": [
+        {
+          "source": "headers/age/index.md",
+          "extrait": "La valeur de l'en-tête est généralement proche de zéro."
+        }
+      ]
+    },
+    {
+      "id": "h04",
+      "type": "cache",
+      "question": "Quel en-tete fournit un identifiant correspondant a une version precise d'une ressource ?",
+      "pertinents": [
+        {
+          "source": "headers/etag/index.md",
+          "extrait": "Une comparaison de ces valeurs permet de déterminer si deux représentations d'une ressource sont identiques."
+        }
+      ]
+    },
+    {
+      "id": "h05",
+      "type": "conditionnel",
+      "question": "Quel en-tete ne declenche la reponse que si l'identifiant de version de la ressource CORRESPOND a celui fourni ?",
+      "pertinents": [
+        {
+          "source": "headers/if-match/index.md",
+          "extrait": "Il permet de vérifier que la modification d'une ressource que l'utilisateur·ice souhaite envoyer n'écrasera pas une autre"
+        }
+      ]
+    },
+    {
+      "id": "h06",
+      "type": "conditionnel",
+      "question": "Quel en-tete ne declenche la reponse que si AUCUN des identifiants de version fournis ne correspond a celui de la ressource ?",
+      "pertinents": [
+        {
+          "source": "headers/if-none-match/index.md",
+          "extrait": "La comparaison avec l'ETag stocké utilise _l'algorithme de comparaison faible_, ce qui signifie que deux fichiers sont considérés"
+        }
+      ]
+    },
+    {
+      "id": "h07",
+      "type": "conditionnel",
+      "question": "Quel en-tete ne renvoie la ressource que si elle a ete modifiee apres une date donnee ?",
+      "pertinents": [
+        {
+          "source": "headers/if-modified-since/index.md",
+          "extrait": "- GMT - : Temps sur le Méridien de Greenwich."
+        }
+      ]
+    },
+    {
+      "id": "h08",
+      "type": "negociation",
+      "question": "Quel en-tete annonce les types MIME que l'emetteur est capable de comprendre ?",
+      "pertinents": [
+        {
+          "source": "headers/accept/index.md",
+          "extrait": "Dans les réponses, il fournit des informations sur les types de contenu que le serveur peut comprendre dans les messages vers la"
+        }
+      ]
+    },
+    {
+      "id": "h09",
+      "type": "negociation",
+      "question": "Quel en-tete annonce l'algorithme de compression que l'emetteur sait decoder ?",
+      "pertinents": [
+        {
+          "source": "headers/accept-encoding/index.md",
+          "extrait": "Dans les réponses, il fournit des informations sur les codages de contenu que le serveur peut comprendre dans les messages vers"
+        }
+      ]
+    },
+    {
+      "id": "h10",
+      "type": "negociation",
+      "question": "Quel en-tete annonce les langues comprises par le client et sa variante locale preferee ?",
+      "pertinents": [
+        {
+          "source": "headers/accept-language/index.md",
+          "extrait": "Les navigateurs définissent les valeurs requises pour cet en-tête en fonction de la langue active de leur interface utilisateur."
+        }
+      ]
+    },
+    {
+      "id": "h11",
+      "type": "authentification",
+      "question": "Quel en-tete porte les informations d'identification envoyees par le client pour s'authentifier ?",
+      "pertinents": [
+        {
+          "source": "headers/authorization/index.md",
+          "extrait": "Cet en-tête indique les schémas d'authentification utilisables pour accéder à la ressource ainsi que toute information"
+        }
+      ]
+    },
+    {
+      "id": "h12",
+      "type": "authentification",
+      "question": "Quel en-tete de reponse indique quelle methode d'authentification employer pour acceder a une ressource ?",
+      "pertinents": [
+        {
+          "source": "headers/www-authenticate/index.md",
+          "extrait": "Si aucun domaine n'est spécifié, les clients affichent souvent un nom de domaine formaté à la place."
+        }
+      ]
+    },
+    {
+      "id": "h13",
+      "type": "divers",
+      "question": "Quel en-tete decide si le contenu s'affiche dans le navigateur ou declenche un telechargement ?",
+      "pertinents": [
+        {
+          "source": "headers/content-disposition/index.md",
+          "extrait": "Dans un corps multipartie, l'en-tête doit être utilisé sur chaque sous-partie pour fournir des informations sur son champ"
+        }
+      ]
+    },
+    {
+      "id": "h14",
+      "type": "divers",
+      "question": "Quel en-tete indique combien de temps attendre avant de refaire une requete ?",
+      "pertinents": [
+        {
+          "source": "headers/retry-after/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "x01",
+      "type": "cors",
+      "question": "Quel en-tete CORS indique avec quelle origine la reponse peut etre partagee ?",
+      "pertinents": [
+        {
+          "source": "headers/access-control-allow-origin/index.md",
+          "extrait": "Si le serveur prend en charge des clients de plusieurs origines, il doit retourner l'origine pour le client spécifique qui fait"
+        }
+      ]
+    },
+    {
+      "id": "x02",
+      "type": "cors",
+      "question": "Quel en-tete CORS enumere les methodes HTTP autorisees pour acceder a une ressource ?",
+      "pertinents": [
+        {
+          "source": "headers/access-control-allow-methods/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "x03",
+      "type": "cors",
+      "question": "Quel en-tete CORS enumere les en-tetes que la requete reelle sera autorisee a utiliser ?",
+      "pertinents": [
+        {
+          "source": "headers/access-control-allow-headers/index.md",
+          "extrait": "L'en-tête peut lister n'importe quel nombre d'en-têtes, séparés par des virgules."
+        }
+      ]
+    },
+    {
+      "id": "x04",
+      "type": "cors",
+      "question": "Quel en-tete CORS autorise l'inclusion de justificatifs dans les requetes ?",
+      "pertinents": [
+        {
+          "source": "headers/access-control-allow-credentials/index.md",
+          "extrait": "C'est la seule valeur valide pour cet en-tête et elle est sensible à la casse."
+        }
+      ]
+    },
+    {
+      "id": "x05",
+      "type": "cors",
+      "question": "Quel en-tete CORS fixe la duree de validite du resultat d'une requete preliminaire ?",
+      "pertinents": [
+        {
+          "source": "headers/access-control-max-age/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "p01",
+      "type": "csp",
+      "question": "Quelle directive CSP sert de valeur de repli pour toutes les autres directives ?",
+      "pertinents": [
+        {
+          "source": "headers/content-security-policy/default-src/index.md",
+          "extrait": "Les ressources de ce type peuvent être chargées si elles correspondent à l'une des expressions de source données."
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "type": "csp",
+      "question": "Quelle directive CSP definit les sources valides pour le code JavaScript ?",
+      "pertinents": [
+        {
+          "source": "headers/content-security-policy/script-src/index.md",
+          "extrait": "Les ressources de ce type peuvent être chargées si elles correspondent à l'une des expressions de source données."
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "type": "csp",
+      "question": "Quelle directive CSP restreint les URL joignables par les interfaces de programmation ?",
+      "pertinents": [
+        {
+          "source": "headers/content-security-policy/connect-src/index.md",
+          "extrait": "Les ressources de ce type peuvent être chargées si elles correspondent à l'une des expressions de source données."
+        }
+      ]
+    },
+    {
+      "id": "p04",
+      "type": "csp",
+      "question": "Quelle directive CSP definit qui a le droit d'integrer la page dans un cadre ?",
+      "pertinents": [
+        {
+          "source": "headers/content-security-policy/frame-ancestors/index.md",
+          "extrait": "Si un ancêtre ne correspond pas, le chargement est annulé."
+        }
+      ]
+    }
+  ]
+}

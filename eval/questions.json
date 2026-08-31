@@ -1,0 +1,538 @@
+{
+  "corpus": "eval/corpus150",
+  "collection": "GlossaireEval",
+  "note": "Verite terrain pour mesurer le recall@k du retriever. Les annotations designent des FICHIERS SOURCES, jamais des chunk_id : un chunk_id change des qu'on touche a CHUNK_SIZE ou au splitter, ce qui invaliderait silencieusement ce fichier. Le champ 'extrait' est rempli et verifie par annoter_extraits.py ; il sert de contexte de lecture, l'evaluation par defaut matche au fichier.",
+  "types": {
+    "auto": "Question 'Qu'est-ce que X ?' formee depuis le titre. Annotation certaine mais teste surtout la correspondance de mots. Sature a 1.00 : ne sert que de garde-fou, pas de mesure.",
+    "reformulee": "Question qui n'emploie PAS le terme du titre. Teste la comprehension semantique.",
+    "confusable": "Question visant UN terme d'une paire proche presente dans le corpus (reflow/repaint, prefetch/prerender, locale/localization...). C'est le type discriminant : il faut distinguer deux concepts voisins, pas seulement trouver un sujet. Plusieurs sources sont annotees quand les deux fiches sont reellement synonymes."
+  },
+  "questions": [
+    {
+      "id": "a01",
+      "type": "auto",
+      "question": "Qu'est-ce que Base64 ?",
+      "pertinents": [
+        {
+          "source": "base64/index.md",
+          "extrait": "Les schémas d'encodage Base64 sont couramment utilisés pour encoder des données binaires afin de les stocker ou de les transférer"
+        }
+      ]
+    },
+    {
+      "id": "a02",
+      "type": "auto",
+      "question": "Qu'est-ce que le CORS ?",
+      "pertinents": [
+        {
+          "source": "cors/index.md",
+          "extrait": "CORS permet de contourner cette limitation en permettant au serveur d'avoir le contrôle sur les ressources partagés et offre un"
+        }
+      ]
+    },
+    {
+      "id": "a03",
+      "type": "auto",
+      "question": "Qu'est-ce que HSTS ?",
+      "pertinents": [
+        {
+          "source": "hsts/index.md",
+          "extrait": "**HTTP Strict Transport Security** permet à un site web d'informer le navigateur que son accès ne devrait pas se faire en HTTP et"
+        }
+      ]
+    },
+    {
+      "id": "a04",
+      "type": "auto",
+      "question": "Qu'est-ce que IMAP ?",
+      "pertinents": [
+        {
+          "source": "imap/index.md",
+          "extrait": "Contrairement à POP3, IMAP autorise des connexions multiples simultanées vers une boîte de messagerie."
+        }
+      ]
+    },
+    {
+      "id": "a05",
+      "type": "auto",
+      "question": "Qu'est-ce que NaN ?",
+      "pertinents": [
+        {
+          "source": "nan/index.md",
+          "extrait": "Ainsi, cette division peut casser le programme."
+        }
+      ]
+    },
+    {
+      "id": "a06",
+      "type": "auto",
+      "question": "Qu'est-ce que QUIC ?",
+      "pertinents": [
+        {
+          "source": "quic/index.md",
+          "extrait": "Plus précisément&nbsp;: - Avec TCP, la poignée de main initiale TCP est éventuellement suivie d'une poignée de main TLS, qui doit"
+        }
+      ]
+    },
+    {
+      "id": "a07",
+      "type": "auto",
+      "question": "Qu'est-ce que le SVG ?",
+      "pertinents": [
+        {
+          "source": "svg/index.md",
+          "extrait": "SVG fournit également un ensemble d'outils, comme du clipping, des masques, des filtres et des animations."
+        }
+      ]
+    },
+    {
+      "id": "a08",
+      "type": "auto",
+      "question": "Qu'est-ce que TURN ?",
+      "pertinents": [
+        {
+          "source": "turn/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "a09",
+      "type": "auto",
+      "question": "Qu'est-ce qu'un UUID ?",
+      "pertinents": [
+        {
+          "source": "uuid/index.md",
+          "extrait": "Les systèmes informatiques génèrent des UUID localement en utilisant de très grands nombres aléatoires."
+        }
+      ]
+    },
+    {
+      "id": "a10",
+      "type": "auto",
+      "question": "Qu'est-ce que les WebSockets ?",
+      "pertinents": [
+        {
+          "source": "websockets/index.md",
+          "extrait": "Grâce à WebSocket, les serveurs peuvent passer des données à un client sans qu'il n'y ait de requête cliente préalable,"
+        }
+      ]
+    },
+    {
+      "id": "a11",
+      "type": "auto",
+      "question": "Qu'est-ce que XQuery ?",
+      "pertinents": [
+        {
+          "source": "xquery/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "a12",
+      "type": "auto",
+      "question": "Qu'est-ce que Bun ?",
+      "pertinents": [
+        {
+          "source": "bun/index.md",
+          "extrait": "Les fonctionnalités notables de Bun incluent&nbsp;: - Remplacement direct de Node.js&nbsp;: presque tous les programmes Node.js"
+        }
+      ]
+    },
+    {
+      "id": "a13",
+      "type": "auto",
+      "question": "Qu'est-ce qu'une DMZ ?",
+      "pertinents": [
+        {
+          "source": "dmz/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "a14",
+      "type": "auto",
+      "question": "Qu'est-ce que le FTP ?",
+      "pertinents": [
+        {
+          "source": "ftp/index.md",
+          "extrait": "Pendant de nombreuses années, c'était le standard _de facto_ pour le transfert de fichiers, mais comme il est intrinsèquement peu"
+        }
+      ]
+    },
+    {
+      "id": "a15",
+      "type": "auto",
+      "question": "Qu'est-ce que le format GIF ?",
+      "pertinents": [
+        {
+          "source": "gif/index.md",
+          "extrait": "Un GIF utilise jusqu'à 8 bits par pixel et un maximum de 256 couleurs issues de l'espace colorimétrique 24 bits."
+        }
+      ]
+    },
+    {
+      "id": "r01",
+      "type": "reformulee",
+      "question": "En JavaScript, pourquoi peut-on parfois utiliser une variable avant la ligne ou elle est declaree ?",
+      "pertinents": [
+        {
+          "source": "hoisting/index.md",
+          "extrait": "Le hissage/la remontée n'est pas un terme défini de façon normative dans la spécification ECMAScript."
+        }
+      ]
+    },
+    {
+      "id": "r02",
+      "type": "reformulee",
+      "commentaire": "Reformulee : la version precedente, 'une fonction qui s'appelle elle-meme', etait ambigue et remontait legitimement IIFE en premier.",
+      "question": "Quelle technique consiste a resoudre un probleme en le ramenant a une version plus petite du meme probleme ?",
+      "pertinents": [
+        {
+          "source": "recursion/index.md",
+          "extrait": "Une fonction qui agit en s'appelant elle-même."
+        }
+      ]
+    },
+    {
+      "id": "r03",
+      "type": "reformulee",
+      "question": "Quand on duplique un objet, que se passe-t-il si ses proprietes pointent encore vers les memes donnees que l'original ?",
+      "pertinents": [
+        {
+          "source": "shallow_copy/index.md",
+          "extrait": "Ainsi, lorsque vous modifiez l'objet source ou la copie, vous pouvez également provoquer une modification de l'autre objet."
+        }
+      ]
+    },
+    {
+      "id": "r04",
+      "type": "reformulee",
+      "question": "En cryptographie, a quoi sert un nombre arbitraire qui ne doit servir qu'une seule fois ?",
+      "pertinents": [
+        {
+          "source": "nonce/index.md",
+          "extrait": "Les nonces sont fréquemment utilisés dans les protocoles d'authentification, les schémas de chiffrement, le hachage et les"
+        }
+      ]
+    },
+    {
+      "id": "r05",
+      "type": "reformulee",
+      "commentaire": "middleware ajoute : la fiche definit l'intergiciel comme un logiciel intermediaire, c'est une reponse legitime que la premiere annotation ignorait.",
+      "question": "Quel type de programme sert d'intermediaire entre un client et un serveur ?",
+      "pertinents": [
+        {
+          "source": "proxy_server/index.md",
+          "extrait": "Un **serveur proxy** (ou «&nbsp;serveur mandataire&nbsp;» en français) est un programme intermédiaire, ou un ordinateur, utilisé"
+        },
+        {
+          "source": "middleware/index.md",
+          "extrait": "Intergiciel (_Middleware_) est un terme (défini vaguement) pour tout logiciel ou service permettant aux parties d'un système de"
+        }
+      ]
+    },
+    {
+      "id": "r06",
+      "type": "reformulee",
+      "question": "Que se passe-t-il quand le navigateur doit rearranger et redessiner la mise en page ?",
+      "pertinents": [
+        {
+          "source": "reflow/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "r07",
+      "type": "reformulee",
+      "question": "En JavaScript, comment qualifie-t-on une valeur consideree comme vraie dans un contexte booleen ?",
+      "pertinents": [
+        {
+          "source": "truthy/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "r08",
+      "type": "reformulee",
+      "question": "Comment nomme-t-on la variation du delai de transmission des paquets sur un reseau ?",
+      "pertinents": [
+        {
+          "source": "jitter/index.md",
+          "extrait": "Une «&nbsp;gigue élevée&nbsp;» indique que les paquets arrivent à des rythmes très variables, possiblement en raison d'une"
+        }
+      ]
+    },
+    {
+      "id": "r09",
+      "type": "reformulee",
+      "question": "Ou le navigateur execute-t-il par defaut le JavaScript et le rendu de la page ?",
+      "pertinents": [
+        {
+          "source": "main_thread/index.md",
+          "extrait": "Par défaut, le navigateur utilise un seul processus pour exécuter tout le JavaScript de votre page, ainsi que pour réaliser la"
+        }
+      ]
+    },
+    {
+      "id": "r10",
+      "type": "reformulee",
+      "question": "Quel composant stocke temporairement les reponses HTTP pour les reutiliser plus tard ?",
+      "pertinents": [
+        {
+          "source": "cache/index.md",
+          "extrait": "Un **cache** (cache web ou cache HTTP) est un composant stockant temporairement les réponses HTTP dans le but de les réutiliser"
+        }
+      ]
+    },
+    {
+      "id": "r11",
+      "type": "reformulee",
+      "question": "Quel type de logiciel permet a une personne malvoyante de percevoir le contenu d'une page web ?",
+      "pertinents": [
+        {
+          "source": "screen_reader/index.md",
+          "extrait": "Les lecteurs d'écran sont des applications logicielles qui tentent de transmettre ce qui est affiché à l'écran de manière non"
+        }
+      ]
+    },
+    {
+      "id": "r12",
+      "type": "reformulee",
+      "question": "Comment represente-t-on un horodatage en comptant les secondes ecoulees depuis le 1er janvier 1970 ?",
+      "pertinents": [
+        {
+          "source": "unix_time/index.md",
+          "extrait": "L'heure Unix est une méthode pour représenter un horodatage et est généralement définie comme le nombre de secondes écoulées"
+        }
+      ]
+    },
+    {
+      "id": "r13",
+      "type": "reformulee",
+      "question": "Comment appelle-t-on la convention d'ecriture ou les espaces sont remplaces par des tirets bas ?",
+      "pertinents": [
+        {
+          "source": "snake_case/index.md",
+          "extrait": "On le stylise souvent en «&nbsp;snake_case&nbsp;» pour rappeler son apparence."
+        }
+      ]
+    },
+    {
+      "id": "r14",
+      "type": "reformulee",
+      "question": "Comment appelle-t-on une fonction JavaScript executee immediatement apres sa definition ?",
+      "pertinents": [
+        {
+          "source": "iife/index.md",
+          "extrait": "On parle aussi de _fonction anonyme auto-exécutée_."
+        }
+      ]
+    },
+    {
+      "id": "r15",
+      "type": "reformulee",
+      "question": "Comment nomme-t-on le plus petit rectangle qui contient entierement un element ?",
+      "pertinents": [
+        {
+          "source": "bounding_box/index.md",
+          "extrait": "Une **boîte englobante** d'un élément est le plus petit rectangle possible (aligné avec les axes du système de coordonnées de"
+        }
+      ]
+    },
+    {
+      "id": "c01",
+      "type": "confusable",
+      "paire": "repaint / reflow",
+      "question": "Que se passe-t-il quand le navigateur redessine une page pour un changement purement visuel, sans modifier la disposition des elements ?",
+      "pertinents": [
+        {
+          "source": "repaint/index.md",
+          "extrait": "Cela fait généralement suite à un reflow, c'est-à-dire lorsque le navigateur recalcule la position et la géométrie de certaines"
+        }
+      ]
+    },
+    {
+      "id": "c02",
+      "type": "confusable",
+      "paire": "reflow / repaint",
+      "question": "Que se passe-t-il quand le navigateur doit recalculer la position et la geometrie des elements avant de les redessiner ?",
+      "pertinents": [
+        {
+          "source": "reflow/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "c03",
+      "type": "confusable",
+      "paire": "prefetch / prerender",
+      "question": "Comment appelle-t-on le fait de recuperer a l'avance des ressources en arriere-plan, sans les afficher ?",
+      "pertinents": [
+        {
+          "source": "prefetch/index.md",
+          "extrait": "Le préchargement désigne la pratique consistant à récupérer de manière spéculative des documents ou des sous-ressources en"
+        }
+      ]
+    },
+    {
+      "id": "c04",
+      "type": "confusable",
+      "paire": "prerender / prefetch",
+      "question": "Comment appelle-t-on le fait de recuperer ET d'afficher a l'avance une page entiere, pour qu'elle apparaisse instantanement si l'utilisateur y va ?",
+      "pertinents": [
+        {
+          "source": "prerender/index.md",
+          "extrait": "Le pré-rendu inclut le téléchargement des sous-ressources d'un document et l'exécution du JavaScript associé."
+        }
+      ]
+    },
+    {
+      "id": "c05",
+      "type": "confusable",
+      "paire": "locale / localization",
+      "question": "Comment appelle-t-on l'ensemble de parametres regionaux — format de date, devise, format de papier — dont un programme tire ses regles ?",
+      "pertinents": [
+        {
+          "source": "locale/index.md",
+          "extrait": "Les **locales** sont un ensemble de paramètres régionaux pour l'interface utilisateur basés sur la langue ou le pays."
+        }
+      ]
+    },
+    {
+      "id": "c06",
+      "type": "confusable",
+      "paire": "localization / locale",
+      "question": "Comment appelle-t-on le processus d'adaptation d'une interface logicielle a une culture donnee ?",
+      "pertinents": [
+        {
+          "source": "localization/index.md",
+          "extrait": "Les facteurs communs suivants sont à considérer&nbsp;: - la langue - les unités de mesure (par exemple, kilomètres en Europe,"
+        }
+      ]
+    },
+    {
+      "id": "c07",
+      "type": "confusable",
+      "paire": "grid_cell / grid_areas",
+      "question": "Dans une grille CSS, comment nomme-t-on la plus petite unite, l'espace cree entre quatre intersections de lignes ?",
+      "pertinents": [
+        {
+          "source": "grid_cell/index.md",
+          "extrait": "D'une certaine façon, une cellule de grille est assimilable à une cellule de tableau."
+        }
+      ]
+    },
+    {
+      "id": "c08",
+      "type": "confusable",
+      "paire": "grid_areas / grid_cell",
+      "question": "Dans une grille CSS, comment nomme-t-on un rectangle forme de plusieurs cellules adjacentes ?",
+      "pertinents": [
+        {
+          "source": "grid_areas/index.md",
+          "extrait": "Il n'est pas possible de créer des zones de grille en forme de T ou de L par exemple."
+        }
+      ]
+    },
+    {
+      "id": "c09",
+      "type": "confusable",
+      "paire": "ipv4 / ipv6",
+      "question": "Quelle version du protocole Internet a ete formalisee en 1981 et fut la premiere reellement deployee ?",
+      "pertinents": [
+        {
+          "source": "ipv4/index.md",
+          "extrait": "Formalisé pour la première fois en 1981, IPv4 prend ces racines dans le développement initial d'ARPAnet."
+        }
+      ]
+    },
+    {
+      "id": "c10",
+      "type": "confusable",
+      "paire": "ipv6 / ipv4",
+      "question": "Quelle version du protocole Internet remplace progressivement la precedente, notamment parce qu'elle offre beaucoup plus d'adresses ?",
+      "pertinents": [
+        {
+          "source": "ipv6/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "c11",
+      "type": "confusable",
+      "paire": "general_header / request_header",
+      "question": "Comment appelait-on un en-tete utilisable a la fois dans les requetes et les reponses HTTP, terme aujourd'hui obsolete ?",
+      "pertinents": [
+        {
+          "source": "general_header/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "c12",
+      "type": "confusable",
+      "paire": "navigation_directive / fetch_directive",
+      "question": "Dans un en-tete CSP, quelles directives regissent les emplacements vers lesquels un utilisateur peut naviguer ou envoyer un formulaire ?",
+      "pertinents": [
+        {
+          "source": "navigation_directive/index.md",
+          "extrait": ""
+        }
+      ]
+    },
+    {
+      "id": "c13",
+      "type": "confusable",
+      "paire": "fetch_directive / navigation_directive",
+      "question": "Dans un en-tete CSP, quelles directives controlent les emplacements depuis lesquels certaines ressources peuvent etre chargees ?",
+      "pertinents": [
+        {
+          "source": "fetch_directive/index.md",
+          "extrait": "Cela signifie que si une instruction fetch est absente dans l'en-tête CSP, l'agent utilisateur recherchera la directive"
+        }
+      ]
+    },
+    {
+      "id": "c14",
+      "type": "confusable",
+      "paire": "type_coercion / type_conversion",
+      "commentaire": "Deux sources valides : la fiche type_conversion traite explicitement de la conversion implicite, elle repond donc aussi.",
+      "question": "En JavaScript, comment appelle-t-on la conversion d'un type vers un autre effectuee automatiquement par le moteur, sans que le code la demande ?",
+      "pertinents": [
+        {
+          "source": "type_coercion/index.md",
+          "extrait": "La _type coercion_ (en français, coercition de type) est la conversion automatique ou implicite de valeurs d'un type de données à"
+        },
+        {
+          "source": "type_conversion/index.md",
+          "extrait": "La conversion de type (ou transtypage) désigne le transfert de données d'un type de donnée vers un autre."
+        }
+      ]
+    },
+    {
+      "id": "c15",
+      "type": "confusable",
+      "paire": "http_content / payload_body",
+      "commentaire": "Deux sources valides : ce sont des synonymes, 'charge utile' ayant ete renomme 'contenu'.",
+      "question": "Dans un message HTTP, comment nomme-t-on l'information transmise dans le corps du message, apres la section d'en-tete ?",
+      "pertinents": [
+        {
+          "source": "http_content/index.md",
+          "extrait": "Dans les messages HTTP, le **contenu** désigne l'«&nbsp;information&nbsp;» transmise dans le corps du message (qui suit la"
+        },
+        {
+          "source": "payload_body/index.md",
+          "extrait": "Sans encodage de transfert, le _corps de la charge utile_ et le _corps du message_ sont identiques."
+        }
+      ]
+    }
+  ]
+}
