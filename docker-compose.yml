@@ -24,7 +24,11 @@ services:
                        #           Si tu oublies ce port, la connexion "réussit"
                        #           puis explose au premier insert/query.
 
-    restart: on-failure:0
+    # unless-stopped : le conteneur revient tout seul au demarrage de Docker,
+    # donc apres chaque redemarrage du PC. Mais il respecte un arret manuel :
+    # apres `docker compose stop`, il reste arrete jusqu'a un `up`.
+    # (on-failure:0, la valeur precedente, ne redemarrait jamais rien.)
+    restart: unless-stopped
 
     volumes:
       - weaviate_data:/var/lib/weaviate   # persistance : sans ça, tu réindexes

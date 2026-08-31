@@ -470,7 +470,7 @@ def cmd_ask(
 ) -> None:
     """RAG complet : retrieval (5-6) puis generation (7).
 
-    rag_generate est importe ici et non en tete de module : le SDK anthropic
+    rag_generate est importe ici et non en tete de module : le SDK mistralai
     n'est requis que pour cette commande, `index` et `query` s'en passent.
     """
     import rag_generate
@@ -501,7 +501,10 @@ def cmd_ask(
         print(rag_generate.describe_request(question, results, effort=effort))
         return
 
-    print(f"\n[7] génération — {rag_generate.MODEL}, effort={effort}\n")
+    effort_affiche = (
+        effort if rag_generate.supports_effort(rag_generate.MODEL) else "non envoye"
+    )
+    print(f"\n[7] génération — {rag_generate.MODEL}, effort={effort_affiche}\n")
     answer = rag_generate.generate(question, results, effort=effort)
     rag_generate.print_answer(answer)
 
@@ -553,7 +556,7 @@ def main() -> None:
     )
 
     p_ask = sub.add_parser(
-        "ask", help="RAG complet : retrieval puis reponse citee par Claude"
+        "ask", help="RAG complet : retrieval puis reponse citee par Mistral"
     )
     p_ask.add_argument("question", type=str)
     p_ask.add_argument("-k", type=int, default=TOP_K, help="nombre de chunks a fournir")

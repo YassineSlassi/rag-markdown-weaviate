@@ -51,16 +51,26 @@ weaviate-client>=4.22           # API v4. Version vérifiée ici : 4.22.0
 #      même paramètre de collections.create(). Cf. TODO 2 de ensure_collection().
 
 # --- Generation (etage 7 : la reponse) -------------------------------------
-anthropic>=0.122                # SDK officiel. Version verifiee ici : 0.122.0
+mistralai>=2.9                  # SDK officiel. Version verifiee ici : 2.9.4
 #
 # Necessaire UNIQUEMENT pour la commande `ask`. `index` et `query` s'en passent
 # (l'import est fait a l'interieur de cmd_ask, pas en tete de rag_pipeline.py),
 # donc tout le retrieval reste utilisable sans cle API ni SDK.
 #
-# Auth : ANTHROPIC_API_KEY dans l'environnement. Jamais en dur dans le code.
-#   cmd.exe :  setx ANTHROPIC_API_KEY "sk-ant-..."   puis NOUVEAU terminal
-# Le SDK lit aussi ANTHROPIC_BASE_URL s'il est present : verifie qu'il ne
-# traine pas dans ton environnement, il redirigerait les appels ailleurs.
+# ATTENTION AU CHANGEMENT D'IMPORT en mistralai 2.x : la classe s'importe
+# desormais depuis `mistralai.client` et non plus depuis `mistralai`, devenu un
+# namespace sans __init__.py. Les tutos ecrits pour la 1.x font
+#   from mistralai import Mistral            -> ImportError en 2.x
+#   from mistralai.client import Mistral     -> correct ici
+#
+# Auth : MISTRAL_API_KEY dans l'environnement. Jamais en dur dans le code.
+#   cmd.exe :  setx MISTRAL_API_KEY "..."   puis NOUVEAU terminal
+#
+# PERTE FONCTIONNELLE ASSUMEE en migrant depuis Anthropic : il n'existe pas
+# d'equivalent aux blocs `search_result` et aux citations attachees par le
+# serveur. Les citations sont desormais des marqueurs [n] ecrits par le modele,
+# relus par parse_citations(). On verifie que le numero existe, jamais qu'il est
+# le bon. Cf. l'en-tete de rag_generate.py.
 
 # --- Confort ---------------------------------------------------------------
 tqdm>=4.70                      # barres de progression pour l'embedding en batch
