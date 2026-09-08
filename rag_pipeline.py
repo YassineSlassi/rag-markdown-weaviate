@@ -340,6 +340,10 @@ def search(collection, embedder, question: str, k: int = TOP_K) -> list[dict]:
                 "score": 1.0 - distance if distance is not None else float("nan"),
                 "source": properties.get("source", "?"),
                 "headers": properties.get("headers") or properties.get("title", ""),
+                # `title` est rendu a part, en plus du repli ci-dessus : le
+                # reranker doit pouvoir reconstruire le fil d'Ariane complet
+                # (title > h1 > h2), le meme que contextualize() a embarque.
+                "title": properties.get("title", ""),
                 "text": properties.get("text", ""),
             }
         )
@@ -356,7 +360,13 @@ def print_results(results: list[dict]) -> None:
         extract = " ".join(item["text"].split())
         if len(extract) > 300:
             extract = extract[:300] + "..."
-        print(f"\n#{item['rank']}  score {item['score']:.4f}  —  {item['source']}")
+        # Deux scores de natures differentes : `score` est une similarite
+        # cosinus dans [-1, 1], `score_rerank` la sortie du cross-encodeur.
+        # Les afficher tous deux etiquetes evite de les confondre.
+        scores = f"cos {item['score']:.4f}"
+        if "score_rerank" in item:
+            scores = f"rerank {item['score_rerank']:.4f}  {scores}"
+        print(f"\n#{item['rank']}  {scores}  —  {item['source']}")
         if item["headers"]:
             print(f"    {item['headers']}")
         print(f"    {extract}")
@@ -436,10 +446,43 @@ def cmd_index(
         client.close()
 
 
+def retrieve(
+    collection,
+    embedder,
+    question: str,
+    k: int = TOP_K,
+    rerank: bool = False,
+    reranker=None,
+) -> list[dict]:
+    """Etage 6 seul, ou 6 puis 6bis quand rerank=True.
+
+    Avec reranking, on demande DELIBEREMENT plus de candidats que les k
+    demandes : le reranker n'a rien a reordonner si le vivier fait deja la
+    taille de la sortie. On elargit a RERANK_POOL, on reordonne, on coupe a k.
+
+    C'est la difference entre les deux usages du reranker. Ici, en production,
+    on RESSERRE (20 -> 5) : le gain est que les 5 chunks envoyes au modele de
+    generation sont mieux choisis. En evaluation (eval/recall_at_k.py), on ne
+    resserre pas : on garde les 20 reordonnes, pour que le recall@20 reste un
+    temoin de controle invariant.
+    """
+    if not rerank:
+        return search(collection, embedder, question, k=k)
+
+    import rag_rerank
+
+    vivier = max(k, rag_rerank.RERANK_POOL)
+    candidats = search(collection, embedder, question, k=vivier)
+    reranker = reranker or rag_rerank.build_reranker()
+    print(f"[6bis] reranking de {len(candidats)} candidats -> {k}")
+    return rag_rerank.rerank(reranker, question, candidats, top_n=k)
+
+
 def cmd_query(
     question: str,
     k: int = TOP_K,
     collection_name: str = COLLECTION_NAME,
+    rerank: bool = False,
 ) -> None:
     """Retrieval seul : etages 5 -> 6."""
     client = connect_weaviate()
@@ -455,8 +498,12 @@ def cmd_query(
 
         embedder = build_embedder()
         print(f"\n[5-6] question : {question!r}  (collection {collection_name})")
-        results = search(collection, embedder, question, k=k)
+        results = retrieve(collection, embedder, question, k=k, rerank=rerank)
         print_results(results)
+        if rerank:
+            import rag_rerank
+
+            rag_rerank.print_mouvement(results)
     finally:
         client.close()
 
@@ -467,6 +514,7 @@ def cmd_ask(
     collection_name: str = COLLECTION_NAME,
     effort: str | None = None,
     dry_run: bool = False,
+    rerank: bool = False,
 ) -> None:
     """RAG complet : retrieval (5-6) puis generation (7).
 
@@ -488,11 +536,15 @@ def cmd_ask(
 
         embedder = build_embedder()
         print(f"\n[5-6] retrieval : {question!r}")
-        results = search(collection, embedder, question, k=k)
+        results = retrieve(collection, embedder, question, k=k, rerank=rerank)
         if not results:
             raise SystemExit("Le retrieval n'a rien renvoyé — la collection est-elle vide ?")
         for item in results:
-            print(f"      #{item['rank']} {item['score']:.4f}  {item['source']}  |  {item['headers']}")
+            note = (
+                f"{item['score_rerank']:.4f}" if "score_rerank" in item
+                else f"{item['score']:.4f}"
+            )
+            print(f"      #{item['rank']} {note}  {item['source']}  |  {item['headers']}")
     finally:
         client.close()
 
@@ -554,6 +606,13 @@ def main() -> None:
         default=COLLECTION_NAME,
         help="collection a interroger",
     )
+    p_query.add_argument(
+        "--rerank",
+        action="store_true",
+        help="reordonne les candidats par cross-encodeur (etage 6bis). Elargit "
+             "le vivier a 20 candidats puis le resserre a -k. Charge un second "
+             "modele (~2,2 Go) et coute ~34 s par question sur CPU.",
+    )
 
     p_ask = sub.add_parser(
         "ask", help="RAG complet : retrieval puis reponse citee par Mistral"
@@ -576,6 +635,11 @@ def main() -> None:
         help="fait le retrieval et affiche la requete, sans appeler le modele "
              "(ne necessite pas de cle API)",
     )
+    p_ask.add_argument(
+        "--rerank",
+        action="store_true",
+        help="reordonne les candidats par cross-encodeur avant la generation",
+    )
 
     args = parser.parse_args()
 
@@ -591,6 +655,7 @@ def main() -> None:
             args.question,
             k=args.k,
             collection_name=normalize_collection_name(args.collection),
+            rerank=args.rerank,
         )
     elif args.command == "ask":
         cmd_ask(
@@ -599,6 +664,7 @@ def main() -> None:
             collection_name=normalize_collection_name(args.collection),
             effort=args.effort,
             dry_run=args.dry_run,
+            rerank=args.rerank,
         )
 
 

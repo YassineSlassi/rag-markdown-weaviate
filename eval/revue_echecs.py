@@ -78,7 +78,13 @@ def main() -> None:
         lignes = []
         for q in data["questions"]:
             resultats = search(collection, embedder, q["question"], k=args.k)
-            attendus = {p["source"] for p in q["pertinents"]}
+            # Seuls les pertinents de niveau 2 comptent comme un succes, comme
+            # dans recall_at_k. Sans ce filtre, un voisin de niveau 1 de
+            # questions_http_v3.json passerait pour la bonne reponse et la
+            # revue sous-estimerait silencieusement le nombre d'echecs.
+            # `pertinence` absent vaut 2 : les jeux binaires marchent tels quels.
+            attendus = {p["source"] for p in q["pertinents"]
+                        if int(p.get("pertinence", 2)) >= 2}
             rang = next((r["rank"] for r in resultats if r["source"] in attendus), None)
             if rang != 1:
                 lignes.append((q, resultats, rang, attendus))
