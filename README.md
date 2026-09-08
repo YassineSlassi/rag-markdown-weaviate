@@ -8,6 +8,8 @@ réponses citées avec Mistral.
 corpus/*.md ─▶ [1 LOAD] ─▶ [2 CHUNK] ─▶ [3 EMBED] ─▶ [4 INDEX] ─▶ Weaviate
 question ────▶ [5 EMBED QUERY] ─▶ [6 SEARCH] ─▶ [6bis RERANK] ─▶ [7 GENERATION]
                                                   (optionnel)
+
+CLI : rag_pipeline.py          Interface graphique : app.py (Streamlit)
 ```
 
 ## Prérequis
@@ -41,7 +43,26 @@ python rag_pipeline.py index                        # indexe le corpus
 python rag_pipeline.py query "ma question" -k 5     # retrieval seul, sans clé API
 python rag_pipeline.py ask   "ma question"          # réponse citée par Mistral
 python rag_pipeline.py query "ma question" --rerank # + reranking par cross-encodeur
+streamlit run app.py                                # interface graphique
 ```
+
+Ces commandes supposent le **venv activé** (cf. Installation). Sans activation,
+`python` et `streamlit` désignent ceux du système — ou n'existent pas — et tu
+obtiens `'streamlit' n'est pas reconnu`. Préfixer par l'interpréteur du venv
+fonctionne dans tous les cas, activé ou non :
+
+```bash
+.venv\Scripts\python.exe rag_pipeline.py query "ma question"
+```
+
+```bash
+.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+Le `-m` n'est nécessaire que pour Streamlit : `rag_pipeline.py` est un script
+qu'on passe directement à l'interpréteur, alors que `streamlit` est un paquet
+dont on invoque le point d'entrée. Sous PowerShell, le préfixe `.\` est
+obligatoire : `.\.venv\Scripts\python.exe`.
 
 `--corpus DIR` et `--collection NAME` permettent d'indexer plusieurs corpus
 côte à côte sans mélanger leurs vecteurs.
@@ -50,6 +71,7 @@ côte à côte sans mélanger leurs vecteurs.
 
 | Fichier | Rôle |
 |---|---|
+| `app.py` | interface Streamlit : retrieval, reranking, réponse citée |
 | `rag_pipeline.py` | les 6 premiers étages + la CLI |
 | `md_metadata.py` | lecture robuste du Markdown, schéma des 16 propriétés Weaviate |
 | `rag_rerank.py` | étage 6bis : reranking des candidats par cross-encodeur |
@@ -57,6 +79,28 @@ côte à côte sans mélanger leurs vecteurs.
 | `docker-compose.yml` | Weaviate (REST 8080 + gRPC 50051) |
 | `eval/` | banc d'essai : recall@k, MRR, nDCG, revue des échecs |
 | `eval/test_mesures.py` | vérifie les propriétés des métriques, sans Weaviate ni modèle |
+
+## Interface graphique
+
+```bash
+.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+Puis `http://localhost:8501`. La barre latérale expose la collection (avec son
+nombre de chunks), `k`, le reranking et son modèle, et la génération. Chaque
+chunk retourné est dépliable, avec son cosinus, son score de reranking et son
+déplacement dans le classement ; avec le reranking, un bloc montre le vivier
+complet des 20 candidats réordonnés, donc ce que le cross-encodeur a écarté.
+
+Sans `MISTRAL_API_KEY` dans l'environnement, la génération est désactivée et le
+retrieval reste pleinement utilisable.
+
+**Le point à comprendre avant de lire `app.py`** : Streamlit réexécute le script
+de haut en bas à chaque interaction. Les trois `@st.cache_resource` ne sont donc
+pas une optimisation mais la condition pour que l'interface soit utilisable —
+sans eux, bouger un curseur rechargerait 4,4 Go de modèles. Corollaire : le
+client Weaviate étant mis en cache, il ne faut jamais l'y fermer, contrairement
+au `try/finally` correct partout ailleurs dans ce projet.
 
 ## Choix de conception
 

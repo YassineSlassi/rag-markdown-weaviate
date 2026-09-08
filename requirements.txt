@@ -74,3 +74,22 @@ mistralai>=2.9                  # SDK officiel. Version verifiee ici : 2.9.4
 
 # --- Confort ---------------------------------------------------------------
 tqdm>=4.70                      # barres de progression pour l'embedding en batch
+
+# --- Interface graphique (etage 8, optionnel) ------------------------------
+streamlit>=1.63                 # Version verifiee ici : 1.63.0
+#
+# Necessaire UNIQUEMENT pour app.py. La CLI de rag_pipeline.py s'en passe.
+#   .venv\Scripts\python.exe -m streamlit run app.py   ->  localhost:8501
+#   (ou bien `streamlit run app.py` si le venv est active)
+#
+# ATTENTION, l'installation RETROGRADE websockets (17.0.1 -> 16.1.1) parce que
+# streamlit le borne. Verifie apres coup :
+#   pip check                          -> doit dire "No broken requirements"
+#   python -c "import weaviate; weaviate.connect_to_local().is_ready()"
+# Sur cette machine les deux passent, mais c'est le genre de contrainte qui se
+# reveille a la prochaine mise a jour.
+#
+# LE PIEGE STREAMLIT a connaitre avant de lire app.py : le script est reexecute
+# de haut en bas a CHAQUE interaction. Sans @st.cache_resource, chaque clic
+# rechargerait BGE-M3 et le reranker, soit 4,4 Go et une quinzaine de secondes.
+# Corollaire : le client Weaviate mis en cache ne doit jamais etre ferme.

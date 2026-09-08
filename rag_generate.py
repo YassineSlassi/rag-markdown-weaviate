@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -156,12 +157,22 @@ def generate(
     effort: str = DEFAULT_EFFORT,
     model: str = MODEL,
     show_stream: bool = True,
+    on_fragment: Callable[[str], None] | None = None,
 ) -> Answer:
     """Appelle Mistral avec les chunks recuperes et retourne la reponse citee.
 
     On streame pour l'affichage progressif et pour eviter les timeouts HTTP avec
     un max_tokens large. Les citations, elles, sont relues APRES coup dans le
     texte complet : contrairement a Anthropic, elles ne viennent pas du serveur.
+
+    `on_fragment` recoit chaque morceau de texte des son arrivee. Il existe pour
+    que l'etage de generation reste le seul a connaitre le protocole de streaming
+    de Mistral : app.py y branche un affichage Streamlit sans avoir a reecrire
+    cette boucle, et un futur appelant y brancherait autre chose.
+
+    `show_stream` et `on_fragment` sont independants : le premier ecrit sur la
+    sortie standard, le second appelle ta fonction. L'interface graphique passe
+    show_stream=False pour ne pas polluer la console qui l'a lancee.
     """
     client = make_client()
 
@@ -189,6 +200,8 @@ def generate(
                     text_parts.append(fragment)
                     if show_stream:
                         print(fragment, end="", flush=True)
+                    if on_fragment is not None:
+                        on_fragment(fragment)
                 if choix.finish_reason:
                     finish_reason = str(choix.finish_reason)
 

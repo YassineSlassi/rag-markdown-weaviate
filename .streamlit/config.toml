@@ -1,0 +1,11 @@
+# Configuration Streamlit du projet.
+[server]
+# headless : ne pas ouvrir de navigateur tout seul au demarrage.
+headless = true
+port = 8501
+# Le rechargement automatique surveille les .py du dossier. Sans cette
+# exclusion, il surveillerait aussi les milliers de .md du corpus.
+folderWatchBlacklist = ["translated-content", "eval/corpus150", ".venv"]
+
+[browser]
+gatherUsageStats = false
