@@ -12,7 +12,7 @@ __pycache__/
 .pytest_cache/
 
 # --- Secrets ---------------------------------------------------------------
-# Le code lit ANTHROPIC_API_KEY depuis l'environnement, donc aucune cle ne
+# Le code lit MISTRAL_API_KEY depuis l'environnement, donc aucune cle ne
 # devrait exister en fichier. Ces regles sont un filet de securite.
 .env
 .env.*
