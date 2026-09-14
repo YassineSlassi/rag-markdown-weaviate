@@ -31,6 +31,7 @@ import argparse
 import statistics
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 import weaviate
@@ -191,12 +192,21 @@ def build_embedder() -> HuggingFaceEmbeddings:
     return embedder
 
 
-def embed_texts(embedder: HuggingFaceEmbeddings, texts: list[str]) -> list[list[float]]:
+def embed_texts(
+    embedder: HuggingFaceEmbeddings,
+    texts: list[str],
+    on_batch: Callable[[int, int], None] | None = None,
+) -> list[list[float]]:
     """Encode une liste de textes en vecteurs, dans le meme ordre.
 
     Deux niveaux de batch : sentence-transformers regroupe deja en interne via
     encode_kwargs ; la boucle ci-dessous existe pour la progression et pour ne
     pas garder toute la matrice intermediaire en memoire.
+
+    `on_batch(faits, total)` est appele apres chaque lot. Il existe parce que
+    tqdm ecrit dans le terminal, ce qui ne sert a rien derriere une interface
+    graphique : la page d'ingestion y branche une barre de progression. Meme
+    motif que `on_fragment` dans rag_generate.generate().
     """
     if not texts:
         return []
@@ -208,6 +218,8 @@ def embed_texts(embedder: HuggingFaceEmbeddings, texts: list[str]) -> list[list[
         unit="batch",
     ):
         vectors.extend(embedder.embed_documents(texts[start : start + EMBED_BATCH_SIZE]))
+        if on_batch is not None:
+            on_batch(len(vectors), len(texts))
 
     # Un decalage d'ordre ou une dimension inattendue produit une recherche qui
     # renvoie des resultats absurdes sans jamais lever d'erreur.

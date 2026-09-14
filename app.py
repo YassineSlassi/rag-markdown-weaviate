@@ -1,33 +1,15 @@
-"""Interface graphique du pipeline RAG.
+"""Interface graphique du pipeline RAG — page d'interrogation.
 
     streamlit run app.py
 
-CE QU'IL FAUT COMPRENDRE DE STREAMLIT AVANT DE LIRE LA SUITE
---------------------------------------------------------------------------
-Streamlit REEXECUTE ce fichier de haut en bas a chaque interaction. Bouger un
-curseur, cocher une case, taper une lettre : le script repart de la ligne 1.
+Cette page fait le retrieval (etages 5-6), le reranking optionnel (6bis) et la
+generation (7). L'ingestion d'un corpus vit dans pages/2_Ingestion.py.
 
-C'est confortable pour ecrire l'affichage, et c'est un piege mortel ici. Ecrit
-naivement, ce fichier rechargerait BGE-M3 (2,2 Go) et le reranker (2,2 Go) a
-CHAQUE clic, soit une quinzaine de secondes d'attente pour avoir deplace un
-curseur d'un cran.
-
-D'ou les trois @st.cache_resource ci-dessous. Ils sont la seule raison pour
-laquelle cette interface est utilisable, pas une optimisation cosmetique.
-
-@st.cache_resource garde l'objet VIVANT entre les reexecutions, contrairement a
-@st.cache_data qui serialise une copie. C'est ce qu'il faut pour un modele ou
-une connexion reseau : on veut le meme objet en memoire, pas un clone.
-
-COROLLAIRE, ET C'EST LE BUG QU'ON NE VOIT PAS VENIR
---------------------------------------------------------------------------
-Le client Weaviate est mis en cache, donc il ne faut JAMAIS l'appeler avec
-close(). Partout ailleurs dans ce projet, connect_weaviate() est suivi d'un
-try/finally qui ferme la connexion — c'est correct pour un script qui se
-termine. Ici, fermer le client detruirait l'objet que le cache continue a
-servir : la premiere requete marcherait, toutes les suivantes echoueraient sur
-une connexion morte. Le bouton "reconnecter" de la barre laterale est la
-maniere propre de repartir de zero.
+Les objets couteux — connexion Weaviate, BGE-M3, reranker — sont dans rag_ui,
+pas ici : Streamlit reexecute ce fichier de haut en bas a CHAQUE interaction,
+et les deux pages doivent partager les memes caches sous peine de charger les
+modeles en double. Lis l'en-tete de rag_ui.py avant celui-ci, il explique le
+modele d'execution et le piege du client mis en cache.
 """
 
 from __future__ import annotations
@@ -36,71 +18,14 @@ import os
 import time
 
 import streamlit as st
-import weaviate
 
 import rag_pipeline
 import rag_rerank
+import rag_ui
 
 # set_page_config doit etre le PREMIER appel Streamlit du script, sinon
 # Streamlit leve une exception. Il n'est donc pas dans une fonction.
-st.set_page_config(page_title="RAG Markdown", page_icon="🔎", layout="wide")
-
-MODELES_RERANK = [
-    "BAAI/bge-reranker-v2-m3",
-    "BAAI/bge-reranker-base",
-]
-
-
-# =============================================================================
-# RESSOURCES PARTAGEES — chargees une fois, reutilisees a chaque reexecution
-# =============================================================================
-@st.cache_resource(show_spinner="Connexion à Weaviate...")
-def get_client() -> weaviate.WeaviateClient:
-    """Connexion Weaviate persistante. Ne jamais fermer, cf. l'en-tete."""
-    client = weaviate.connect_to_local()
-    if not client.is_ready():
-        client.close()
-        raise RuntimeError("Weaviate répond mais n'est pas prêt.")
-    return client
-
-
-@st.cache_resource(show_spinner="Chargement de BGE-M3 (~2,2 Go)...")
-def get_embedder():
-    return rag_pipeline.build_embedder()
-
-
-@st.cache_resource(show_spinner="Chargement du reranker...")
-def get_reranker(model_name: str):
-    """Un cache par nom de modele.
-
-    Streamlit derive la cle du cache des ARGUMENTS : changer le modele dans la
-    barre laterale charge le nouveau et garde l'ancien en memoire, donc revenir
-    a l'autre est instantane. C'est aussi pourquoi le nom du modele est un
-    parametre plutot qu'une lecture directe de rag_rerank.RERANK_MODEL.
-    """
-    return rag_rerank.build_reranker(model_name)
-
-
-@st.cache_data(ttl=30, show_spinner=False)
-def lister_collections(_client) -> dict[str, int]:
-    """Nom -> nombre d'objets, pour chaque collection de l'instance.
-
-    Le parametre s'appelle _client avec un underscore initial : c'est la
-    convention Streamlit pour "n'essaie pas de hacher cet argument". Sans lui,
-    @st.cache_data echouerait, le client Weaviate n'etant pas serialisable.
-
-    ttl=30 parce qu'un `index` lance en parallele dans un terminal fait changer
-    ces nombres, et qu'on veut les voir bouger sans redemarrer l'interface.
-    """
-    comptes = {}
-    for nom in sorted(_client.collections.list_all().keys()):
-        try:
-            collection = _client.collections.get(nom)
-            comptes[nom] = collection.aggregate.over_all(total_count=True).total_count
-        except Exception:
-            # Une collection illisible ne doit pas empecher d'afficher les autres.
-            comptes[nom] = -1
-    return comptes
+st.set_page_config(page_title="Interroger", page_icon="🔎", layout="wide")
 
 
 # =============================================================================
@@ -193,16 +118,9 @@ def afficher_citations(answer, resultats: list[dict]) -> None:
 st.sidebar.title("🔎 RAG Markdown")
 st.sidebar.caption("BGE-M3 → Weaviate → Mistral")
 
-try:
-    client = get_client()
-except Exception as exc:
-    st.error(
-        f"**Connexion à Weaviate impossible.**\n\n`{exc}`\n\n"
-        "Le conteneur tourne-t-il ?  →  `docker compose up -d`"
-    )
-    st.stop()
+client = rag_ui.connecter_ou_stopper()
 
-collections = lister_collections(client)
+collections = rag_ui.lister_collections(client)
 if not collections:
     st.warning(
         "Aucune collection dans Weaviate. Indexe d'abord un corpus :\n\n"
@@ -230,7 +148,7 @@ rerank_actif = st.sidebar.toggle(
 )
 modele_rerank = st.sidebar.selectbox(
     "Modèle de reranking",
-    MODELES_RERANK,
+    rag_ui.MODELES_RERANK,
     disabled=not rerank_actif,
     help="v2-m3 est meilleur, base est 3,4× plus rapide.",
 )
@@ -251,12 +169,7 @@ if not cle_presente:
     )
 
 st.sidebar.divider()
-if st.sidebar.button("Reconnecter / vider le cache", use_container_width=True):
-    # La seule facon propre de repartir de zero : le client Weaviate etant en
-    # cache, un redemarrage du conteneur laisse une connexion morte derriere lui.
-    st.cache_resource.clear()
-    st.cache_data.clear()
-    st.rerun()
+rag_ui.bouton_reconnexion()
 
 
 # =============================================================================
@@ -276,12 +189,12 @@ with st.form("recherche"):
 # soumission. Sans lui, chaque lettre tapee relancerait le script.
 
 if lancer and question.strip():
-    embedder = get_embedder()
+    embedder = rag_ui.get_embedder()
     collection = client.collections.get(collection_name)
 
     debut = time.perf_counter()
     if rerank_actif:
-        reranker = get_reranker(modele_rerank)
+        reranker = rag_ui.get_reranker(modele_rerank)
         vivier = max(top_k, rag_rerank.RERANK_POOL)
         with st.spinner(f"Recherche puis reranking de {vivier} candidats..."):
             candidats = rag_pipeline.search(collection, embedder, question, k=vivier)

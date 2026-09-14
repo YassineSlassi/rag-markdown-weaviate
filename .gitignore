@@ -37,3 +37,9 @@ weaviate_data/
 .idea/
 Thumbs.db
 desktop.ini
+
+# --- Fichiers televerses par l'interface ------------------------------------
+# uploads/ est le dossier de depot de pages/2_Ingestion.py : ce sont les
+# donnees de l'utilisateur, pas du code. Le contenu indexe dans Weaviate en
+# est la copie, et le volume Docker n'est pas versionne non plus.
+uploads/

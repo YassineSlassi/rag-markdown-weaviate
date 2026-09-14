@@ -71,7 +71,10 @@ côte à côte sans mélanger leurs vecteurs.
 
 | Fichier | Rôle |
 |---|---|
-| `app.py` | interface Streamlit : retrieval, reranking, réponse citée |
+| `app.py` | interface Streamlit, page d'interrogation |
+| `pages/2_Ingestion.py` | interface Streamlit, page de téléversement et d'ingestion |
+| `rag_ui.py` | ressources partagées par les pages : caches Weaviate et modèles |
+| `rag_ingest.py` | dépôt des fichiers, lecture ciblée, purge d'une source |
 | `rag_pipeline.py` | les 6 premiers étages + la CLI |
 | `md_metadata.py` | lecture robuste du Markdown, schéma des 16 propriétés Weaviate |
 | `rag_rerank.py` | étage 6bis : reranking des candidats par cross-encodeur |
@@ -79,6 +82,7 @@ côte à côte sans mélanger leurs vecteurs.
 | `docker-compose.yml` | Weaviate (REST 8080 + gRPC 50051) |
 | `eval/` | banc d'essai : recall@k, MRR, nDCG, revue des échecs |
 | `eval/test_mesures.py` | vérifie les propriétés des métriques, sans Weaviate ni modèle |
+| `eval/test_ingestion.py` | vérifie la chaîne dépôt → lecture, sans Streamlit ni Weaviate |
 
 ## Interface graphique
 
@@ -86,7 +90,12 @@ côte à côte sans mélanger leurs vecteurs.
 .venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-Puis `http://localhost:8501`. La barre latérale expose la collection (avec son
+Puis `http://localhost:8501`. Deux pages, accessibles par la navigation en haut
+de la barre latérale.
+
+### Interroger
+
+La barre latérale expose la collection (avec son
 nombre de chunks), `k`, le reranking et son modèle, et la génération. Chaque
 chunk retourné est dépliable, avec son cosinus, son score de reranking et son
 déplacement dans le classement ; avec le reranking, un bloc montre le vivier
@@ -94,6 +103,28 @@ complet des 20 candidats réordonnés, donc ce que le cross-encodeur a écarté.
 
 Sans `MISTRAL_API_KEY` dans l'environnement, la génération est désactivée et le
 retrieval reste pleinement utilisable.
+
+### Ingérer
+
+Téléversement d'un ou plusieurs `.md`, puis les étages 1 à 4 sur ces seuls
+fichiers. Le bouton **Analyser** s'arrête avant la vectorisation : il donne le
+nombre de chunks, leur médiane et trois exemples, ce qui permet de juger le
+découpage avant de payer l'embedding. **Ingérer** enchaîne, barre de progression
+comprise.
+
+Les fichiers sont écrits dans `uploads/<collection>/` (exclu du dépôt). Ce
+détour par le disque n'est pas un caprice : `source` est la moitié de l'identité
+d'un chunk — l'UUID vient de `(source, chunk_index)` — et un chemin relatif à un
+dossier de dépôt la rend stable d'une ingestion à l'autre. Il permet aussi de
+réutiliser `read_markdown()`, qui sait déjà lire un fichier sans présumer de son
+encodage. Un encodage non-UTF-8 est signalé à l'écran plutôt que silencieux.
+
+**Réingérer un fichier corrigé purge d'abord ses chunks.** C'est la correction
+d'une limite documentée dans `index_chunks()` : l'UUID étant dérivé de
+`(source, chunk_index)`, réindexer écrase les chunks un à un, mais un document
+passant de 12 à 8 chunks laisse les chunks 8 à 11 orphelins dans l'index. En CLI
+la parade est `--recreate`, qui reconstruit tout. Ici on supprime les chunks des
+seules sources renvoyées, et le reste de la collection n'est pas touché.
 
 **Le point à comprendre avant de lire `app.py`** : Streamlit réexécute le script
 de haut en bas à chaque interaction. Les trois `@st.cache_resource` ne sont donc
