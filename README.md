@@ -235,6 +235,53 @@ qu'il faudrait corriger, pas l'ordre.
   humain. Ils servent à **comparer** deux configurations, pas à publier un
   chiffre absolu.
 
+## Reprendre sur une autre machine
+
+Tout ce qui compte est dans ce dépôt. Ce qui ne l'est pas — l'index Weaviate,
+les modèles, le corpus MDN — se reconstruit par les commandes ci-dessous.
+
+```bash
+git clone https://github.com/YassineSlassi/rag-markdown-weaviate.git
+cd rag-markdown-weaviate
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Puis, dans l'ordre :
+
+```bash
+setx MISTRAL_API_KEY "ta-cle"
+```
+
+*(à lancer toi-même, et rouvrir le terminal ensuite — `setx` n'affecte pas la
+session en cours.)*
+
+```bash
+docker compose up -d
+```
+
+Le corpus HTTP n'est pas versionné (contenu Mozilla). On le reclone :
+
+```bash
+git clone --filter=blob:none https://github.com/mdn/translated-content.git
+```
+
+Les 261 fiches attendues sont sous
+`translated-content/files/fr/web/http/reference/{headers,status}`.
+
+```bash
+.venv\Scripts\python.exe rag_pipeline.py index --dry-run
+.venv\Scripts\python.exe rag_pipeline.py index
+```
+
+Les modèles (BGE-M3 2,2 Go, le reranker, et ~500 Mo de modèles Docling) se
+téléchargent seuls au premier usage, dans `~/.cache/huggingface`.
+
+Enfin, ce qui ne se reconstruit pas et se **copie** si tu y tiens : les fichiers
+de mémoire de Claude Code, dans
+`~/.claude/projects/<nom-du-projet>/memory/`. Ils portent l'état du projet et
+les préférences de travail, pas du code.
+
 ## Licences et attribution
 
 Le code de ce dépôt est publié sous la licence indiquée dans `LICENSE.md`.

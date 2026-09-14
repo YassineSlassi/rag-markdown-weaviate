@@ -49,3 +49,9 @@ uploads/
 # .docling.json) : ce sont des donnees, pas du code. Les scripts, eux, sont
 # versionnes.
 labo_docling/documents/
+
+# --- Corpus MDN -------------------------------------------------------------
+# Clone de github.com/mdn/translated-content : 17 Mo, contenu Mozilla sous
+# CC-BY-SA, regenerable par un clone. Cette regle etait dans .git/info/exclude,
+# qui est local et ne suit pas le depot — d'ou sa place ici.
+translated-content/
