@@ -93,3 +93,26 @@ streamlit>=1.63                 # Version verifiee ici : 1.63.0
 # de haut en bas a CHAQUE interaction. Sans @st.cache_resource, chaque clic
 # rechargerait BGE-M3 et le reranker, soit 4,4 Go et une quinzaine de secondes.
 # Corollaire : le client Weaviate mis en cache ne doit jamais etre ferme.
+
+# --- Lecture de PDF (etage 1, variante PDF) --------------------------------
+docling>=2.127                  # Version verifiee ici : 2.127.0
+#
+# Docling ne lit pas un PDF, il en RECONSTRUIT la structure : des modeles de
+# vision etiquettent les zones (titre, paragraphe, tableau) et TableFormer
+# rebatit les lignes et colonnes. C'est ce qui donne les `#` dont le chunking
+# a besoin, et qu'un PDF n'a pas.
+#
+# ATTENTION, l'installation FAIT MONTER torch de 2.13 a 2.14, plus torchvision,
+# opencv, rapidocr et une quarantaine d'autres (~1 Go). Verifie apres coup que
+# l'etage 3 tient toujours :
+#   python eval/test_mesures.py        (5/5 attendus)
+#   python rag_pipeline.py query "..." --collection HttpStress --rerank
+# Retour arriere si besoin : pip install torch==2.13.0
+#
+# DEUX PIEGES etablis par mesure, detailles dans labo_docling/README.md :
+#   - do_ocr=True par defaut coute les DEUX TIERS du temps et ne sert QUE sur
+#     du document scanne. Sur un PDF non scanne, le document produit est
+#     identique au caractere pres. -> options.do_ocr = False
+#   - une conversion peut mourir en SEGMENTATION FAULT (code natif). Aucun
+#     try/except ne l'attrape. Une ingestion de PDF doit donc convertir dans un
+#     SOUS-PROCESSUS, sinon un fichier pathologique emporte Streamlit avec lui.

@@ -43,3 +43,9 @@ desktop.ini
 # donnees de l'utilisateur, pas du code. Le contenu indexe dans Weaviate en
 # est la copie, et le volume Docker n'est pas versionne non plus.
 uploads/
+
+# --- Bac d'essai Docling ----------------------------------------------------
+# Les PDF cobayes et tout ce que les scripts en derivent (.md exporte, cache
+# .docling.json) : ce sont des donnees, pas du code. Les scripts, eux, sont
+# versionnes.
+labo_docling/documents/
